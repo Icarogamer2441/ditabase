@@ -5,7 +5,7 @@ A Python library for data management with support for uniqueness constraints and
 ## Installation
 
 ```bash
-pip install -e .
+pip install .
 ```
 
 ## Basic Usage
