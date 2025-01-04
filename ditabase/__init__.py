@@ -60,7 +60,13 @@ def execute(command: str) -> None:
     """
     if _instance is None:
         raise RuntimeError("Ditabase not initialized. Call ditabase.init() first.")
-    _instance.execute(command)
+        
+    # Execute the command using the tokenizer, parser and compiler
+    tokenizer = Tokenizer(command)
+    tokens = tokenizer.tokenize()
+    parser = Parser(tokens)
+    statements = parser.parse()
+    _instance.compiler.compile(statements, _instance.db_file)
 
 class Table:
     def __init__(self, name: str, data: Dict[str, Any]):
@@ -171,13 +177,12 @@ class Ditabase:
         
         Args:
             command (str): Ditabase command to execute
-        
-        Raises:
-            RuntimeError: If init() was not called first
         """
-        if _instance is None:
-            raise RuntimeError("Ditabase not initialized. Call ditabase.init() first.")
-        _instance.execute(command)
+        tokenizer = Tokenizer(command)
+        tokens = tokenizer.tokenize()
+        parser = Parser(tokens)
+        statements = parser.parse()
+        self.compiler.compile(statements, self.db_file)
 
 # Library version
 __version__ = "0.1.0" 
