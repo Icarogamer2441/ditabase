@@ -50,6 +50,15 @@ class PrintItemStatement:
 class RemoveTableStatement:
     table_name: str
 
+@dataclass
+class ChangeValueStatement:
+    table_name: str
+    column_name: str
+    old_value: str
+    new_value: str
+    condition_column: str | None = None
+    condition_value: str | None = None
+
 class Parser:
     def __init__(self, tokens: List[Token]):
         self.tokens = tokens
@@ -75,6 +84,8 @@ class Parser:
                     statements.append(self.print_item_statement())
                 else:
                     statements.append(self.print_statement())
+            elif self.match(TokenType.CHANGE):
+                statements.append(self.change_value_statement())
             else:
                 raise SyntaxError(f"Unexpected command: {self.peek().value}")
                 
@@ -248,6 +259,30 @@ class Parser:
         table_name = self.consume(TokenType.IDENTIFIER, "Expected table name").value
         self.consume(TokenType.SEMICOLON, "Expected ';' after table name")
         return DeleteTableStatement(table_name)
+    
+    def change_value_statement(self) -> ChangeValueStatement:
+        self.consume(TokenType.VALUE, "Expected 'VALUE' after 'CHANGE'")
+        self.consume(TokenType.OF, "Expected 'OF' after 'VALUE'")
+        column = self.consume(TokenType.IDENTIFIER, "Expected column name").value
+        self.consume(TokenType.EQUALS, "Expected '=' after column name")
+        old_value = self.consume(TokenType.STRING, "Expected old value").value
+        self.consume(TokenType.TO, "Expected 'TO' after old value")
+        new_value = self.consume(TokenType.STRING, "Expected new value").value
+        self.consume(TokenType.FROM, "Expected 'FROM' after new value")
+        self.consume(TokenType.TABLE, "Expected 'TABLE' after 'FROM'")
+        table_name = self.consume(TokenType.IDENTIFIER, "Expected table name").value
+        
+        # Check for optional WHERE clause
+        condition_column = None
+        condition_value = None
+        if self.match(TokenType.WHERE):
+            condition_column = self.consume(TokenType.IDENTIFIER, "Expected condition column name").value
+            self.consume(TokenType.EQUALS, "Expected '=' after condition column name")
+            condition_value = self.consume(TokenType.STRING, "Expected condition value").value
+        
+        self.consume(TokenType.SEMICOLON, "Expected ';' after table name")
+        
+        return ChangeValueStatement(table_name, column, old_value, new_value, condition_column, condition_value)
     
     def match(self, *types) -> bool:
         for type in types:

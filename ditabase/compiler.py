@@ -1,7 +1,7 @@
 import struct
 import uuid
 from typing import List, Any
-from .parser import CreateTableStatement, InsertStatement, PrintTableStatement, Column, DeleteStatement, PrintItemStatement, RemoveTableStatement, DeleteTableStatement
+from .parser import CreateTableStatement, InsertStatement, PrintTableStatement, Column, DeleteStatement, PrintItemStatement, RemoveTableStatement, DeleteTableStatement, ChangeValueStatement
 import os
 
 class Compiler:
@@ -99,6 +99,8 @@ class Compiler:
                 self.print_item(stmt)
             elif isinstance(stmt, RemoveTableStatement):
                 self.remove_table(stmt.table_name)
+            elif isinstance(stmt, ChangeValueStatement):
+                self.change_value(stmt)
                 
         # Salva tudo no arquivo binário
         self.save_to_file(output_file)
@@ -286,3 +288,72 @@ class Compiler:
         if table_name not in self.tables:
             raise ValueError(f"Table {table_name} does not exist")
         del self.tables[table_name] 
+    
+    def change_value(self, stmt: ChangeValueStatement):
+        """Changes a value in a table"""
+        if stmt.table_name not in self.tables:
+            raise ValueError(f"Table {stmt.table_name} does not exist")
+            
+        table = self.tables[stmt.table_name]
+        
+        # Validate new value type
+        for column in table['columns']:
+            if column.name == stmt.column_name:
+                value = stmt.new_value
+                
+                # Validate BOOL values
+                if column.type == "BOOL":
+                    try:
+                        num = int(value)
+                        if num not in [0, 1]:
+                            raise ValueError
+                    except ValueError:
+                        raise ValueError(f"BOOL type only accepts '0' or '1', got '{value}'")
+                
+                # Validate CHAR values
+                elif column.type == "CHAR":
+                    if len(value) != 1:
+                        raise ValueError(f"CHAR type only accepts single character, got '{value}'")
+                
+                # Validate integer types
+                elif column.type == "INT16":
+                    try:
+                        num = int(value)
+                        if num < -32768 or num > 32767:
+                            raise ValueError(f"INT16 value must be between -32768 and 32767, got {value}")
+                    except ValueError:
+                        raise ValueError(f"Invalid INT16 value: {value}")
+                
+                elif column.type == "INT32":
+                    try:
+                        num = int(value)
+                        if num < -2147483648 or num > 2147483647:
+                            raise ValueError(f"INT32 value must be between -2147483648 and 2147483647, got {value}")
+                    except ValueError:
+                        raise ValueError(f"Invalid INT32 value: {value}")
+                
+                elif column.type == "INT64":
+                    try:
+                        num = int(value)
+                        if num < -9223372036854775808 or num > 9223372036854775807:
+                            raise ValueError(f"INT64 value must be between -9223372036854775808 and 9223372036854775807, got {value}")
+                    except ValueError:
+                        raise ValueError(f"Invalid INT64 value: {value}")
+        
+        # Update matching rows
+        changed = False
+        for row in table['data']:
+            # Check if row matches conditions
+            matches = row.get(stmt.column_name) == stmt.old_value
+            if stmt.condition_column and stmt.condition_value:
+                matches = matches and row.get(stmt.condition_column) == stmt.condition_value
+            
+            if matches:
+                row[stmt.column_name] = stmt.new_value
+                changed = True
+                
+        if not changed:
+            error = f"No rows found with {stmt.column_name}=\"{stmt.old_value}\""
+            if stmt.condition_column and stmt.condition_value:
+                error += f" and {stmt.condition_column}=\"{stmt.condition_value}\""
+            raise ValueError(error) 

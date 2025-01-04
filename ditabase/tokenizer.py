@@ -24,6 +24,9 @@ class TokenType(Enum):
     FROM = "FROM"
     WHERE = "WHERE"
     REMOVE = "REMOVE"
+    CHANGE = "CHANGE"
+    VALUE = "VALUE"
+    OF = "OF"
     INT16 = "INT16"
     INT32 = "INT32"
     INT64 = "INT64"
@@ -126,7 +129,16 @@ class Tokenizer:
             'PRINT': TokenType.PRINT,
             'DELETE': TokenType.DELETE,
             'FROM': TokenType.FROM,
-            'WHERE': TokenType.WHERE
+            'WHERE': TokenType.WHERE,
+            'REMOVE': TokenType.REMOVE,
+            'INT16': TokenType.INT16,
+            'INT32': TokenType.INT32,
+            'INT64': TokenType.INT64,
+            'CHAR': TokenType.CHAR,
+            'BOOL': TokenType.BOOL,
+            'CHANGE': TokenType.CHANGE,
+            'VALUE': TokenType.VALUE,
+            'OF': TokenType.OF
         }
         
         # Check if it's a keyword only if text is all uppercase

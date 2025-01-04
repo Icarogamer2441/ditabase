@@ -140,6 +140,14 @@ DELETE ITEM { name="John Doe" } FROM TABLE users;
 DELETE TABLE table_name;
 ```
 
+### Update Data
+
+```
+CHANGE VALUE OF name="John Doe" TO "Jane Doe" FROM TABLE users;
+
+CHANGE VALUE OF password="12423" TO "12345" FROM TABLE users WHERE name="John Doe";
+```
+
 ## Constraints
 
 - **UNIC**: Allows a maximum of 2 items with the same value
