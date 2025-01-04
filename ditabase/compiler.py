@@ -109,6 +109,50 @@ class Compiler:
             
         table = self.tables[stmt.table_name]
         
+        # Validate data types before inserting
+        for column in table['columns']:
+            if column.name in stmt.values:
+                value = stmt.values[column.name]
+                
+                # Validate BOOL values
+                if column.type == "BOOL":
+                    try:
+                        num = int(value)
+                        if num not in [0, 1]:
+                            raise ValueError
+                    except ValueError:
+                        raise ValueError(f"BOOL type only accepts '0' or '1', got '{value}'")
+                
+                # Validate CHAR values
+                elif column.type == "CHAR":
+                    if len(value) != 1:
+                        raise ValueError(f"CHAR type only accepts single character, got '{value}'")
+                
+                # Validate integer types
+                elif column.type == "INT16":
+                    try:
+                        num = int(value)
+                        if num < -32768 or num > 32767:
+                            raise ValueError(f"INT16 value must be between -32768 and 32767, got {value}")
+                    except ValueError:
+                        raise ValueError(f"Invalid INT16 value: {value}")
+                
+                elif column.type == "INT32":
+                    try:
+                        num = int(value)
+                        if num < -2147483648 or num > 2147483647:
+                            raise ValueError(f"INT32 value must be between -2147483648 and 2147483647, got {value}")
+                    except ValueError:
+                        raise ValueError(f"Invalid INT32 value: {value}")
+                
+                elif column.type == "INT64":
+                    try:
+                        num = int(value)
+                        if num < -9223372036854775808 or num > 9223372036854775807:
+                            raise ValueError(f"INT64 value must be between -9223372036854775808 and 9223372036854775807, got {value}")
+                    except ValueError:
+                        raise ValueError(f"Invalid INT64 value: {value}")
+        
         # Verifica restrições antes de inserir
         for column in table['columns']:
             if column.name in stmt.values:

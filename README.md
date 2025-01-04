@@ -38,9 +38,9 @@ NEW TABLE IF EXISTS IS FALSE {
 
 ```python
 ditabase.execute("""
-ADD ITEM {
-    name="John Doe",
-    password="12423"
+ADD ITEM { 
+    name="John Doe", 
+    password="12423" 
 } TO TABLE users;
 """)
 ```
@@ -63,7 +63,7 @@ for column in columns:
 
 ```python
 items = users.get_items()
-print(items)  # {'id': [...], 'name': [...], 'password': [...]}
+print(items)  # {'id': [...], 'name': [...], 'password': [...]} 
 ```
 
 # Fetch a specific item
@@ -96,16 +96,21 @@ ditabase database.dtb
 NEW TABLE IF EXISTS IS FALSE {
     UNIC MAIN UUID id,    # Unique, maximum 1 item
     STR name,             # Normal string
-    PASSWORD password     # Password field
+    PASSWORD password,    # Password field
+    INT32 age,            # 32-bit integer
+    INT64 salary,         # 64-bit integer
+    INT16 code,           # 16-bit integer
+    CHAR grade,           # Single character
+    BOOL is_active        # Boolean (0 for false, 1 for true)
 } table_name;
 ```
 
 ### Insert Data
 
 ```
-ADD ITEM {
-    name="John Doe",
-    password="12423"
+ADD ITEM { 
+    name="John Doe", 
+    password="12423" 
 } TO TABLE users;
 ```
 
@@ -129,6 +134,12 @@ PRINT ITEM password WHERE name="John Doe" FROM TABLE users;
 DELETE ITEM { name="John Doe" } FROM TABLE users;
 ```
 
+### Delete Table
+
+```
+DELETE TABLE table_name;
+```
+
 ## Constraints
 
 - **UNIC**: Allows a maximum of 2 items with the same value
@@ -140,6 +151,11 @@ DELETE ITEM { name="John Doe" } FROM TABLE users;
 - **UUID**: Universally Unique Identifier
 - **STR**: Normal string
 - **PASSWORD**: Password field
+- **INT32**: 32-bit integer
+- **INT64**: 64-bit integer
+- **INT16**: 16-bit integer
+- **CHAR**: Single character
+- **BOOL**: Boolean (0 for false, 1 for true)
 
 ## Python API
 
@@ -165,7 +181,12 @@ Example file example.ditabs:
 NEW TABLE IF EXISTS IS FALSE {
     UNIC MAIN UUID id,
     STR name,
-    PASSWORD password
+    PASSWORD password,
+    INT32 age,
+    INT64 salary,
+    INT16 code,
+    CHAR grade,
+    BOOL is_active
 } users;
 
 ADD ITEM { name="John Doe", password="12423" } TO TABLE users;

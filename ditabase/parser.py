@@ -123,24 +123,63 @@ class Parser:
         return CreateTableStatement(Table(table_name, columns), if_not_exists)
     
     def insert_statement(self) -> InsertStatement:
-        self.consume(TokenType.ITEM, "Esperado 'ITEM' após 'ADD'")
-        self.consume(TokenType.LEFT_BRACE, "Esperado '{' após 'ITEM'")
+        self.consume(TokenType.ITEM, "Expected 'ITEM' after 'ADD'")
+        self.consume(TokenType.LEFT_BRACE, "Expected '{' after 'ITEM'")
         
         values = {}
         while not self.check(TokenType.RIGHT_BRACE):
-            name = self.consume(TokenType.IDENTIFIER, "Esperado nome do campo").value
-            self.consume(TokenType.EQUALS, "Esperado '=' após nome do campo")
-            value = self.consume(TokenType.STRING, "Esperado valor string").value
+            name = self.consume(TokenType.IDENTIFIER, "Expected field name").value
+            self.consume(TokenType.EQUALS, "Expected '=' after field name")
+            value = self.consume(TokenType.STRING, "Expected string value").value
             
-            # Validate BOOL values
-            if name in self._get_column_types() and self._get_column_types()[name] == "BOOL":
-                if value not in ["0", "1"]:
-                    raise ValueError(f"BOOL type only accepts '0' or '1', got '{value}'")
+            # Get column type for validation
+            column_types = self._get_column_types()
+            if name in column_types:
+                col_type = column_types[name]
+                
+                # Validate BOOL values
+                if col_type == "BOOL":
+                    try:
+                        num = int(value)
+                        if num not in [0, 1]:
+                            raise ValueError
+                    except ValueError:
+                        raise ValueError(f"BOOL type only accepts '0' or '1', got '{value}'")
+                
+                # Validate CHAR values
+                elif col_type == "CHAR":
+                    if len(value) != 1:
+                        raise ValueError(f"CHAR type only accepts single character, got '{value}'")
+                
+                # Validate integer types
+                elif col_type == "INT16":
+                    try:
+                        num = int(value)
+                        if num < -32768 or num > 32767:
+                            raise ValueError(f"INT16 value must be between -32768 and 32767, got {value}")
+                    except ValueError:
+                        raise ValueError(f"Invalid INT16 value: {value}")
+                
+                elif col_type == "INT32":
+                    try:
+                        num = int(value)
+                        if num < -2147483648 or num > 2147483647:
+                            raise ValueError(f"INT32 value must be between -2147483648 and 2147483647, got {value}")
+                    except ValueError:
+                        raise ValueError(f"Invalid INT32 value: {value}")
+                
+                elif col_type == "INT64":
+                    try:
+                        num = int(value)
+                        if num < -9223372036854775808 or num > 9223372036854775807:
+                            raise ValueError(f"INT64 value must be between -9223372036854775808 and 9223372036854775807, got {value}")
+                    except ValueError:
+                        raise ValueError(f"Invalid INT64 value: {value}")
             
             values[name] = value
             
             if not self.check(TokenType.RIGHT_BRACE):
-                self.consume(TokenType.COMMA, "Esperado ',' entre valores")
+                self.consume(TokenType.COMMA, "Expected ',' between values")
                 
         self.consume(TokenType.RIGHT_BRACE, "Esperado '}' após valores")
         self.consume(TokenType.TO, "Esperado 'TO' após valores")
