@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="ditabase",
-    version="0.1.0",
+    version="0.1",
     packages=find_packages(),
     description="A Python library for data management with support for uniqueness constraints and item limits",
     long_description=long_description,

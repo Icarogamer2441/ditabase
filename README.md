@@ -174,6 +174,7 @@ CHANGE VALUE OF password="12423" TO "12345" FROM TABLE users WHERE name="John Do
 - ditabase.get_table(name): Retrieves a table
 - ditabase.get_rows(table_name): Retrieves rows from a table
 - ditabase.get_columns(table_name): Retrieves columns from a table
+- ditabase.execute_file(file_path): Executes a Ditabase file
 
 ### Table Class
 

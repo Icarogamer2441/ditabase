@@ -120,16 +120,16 @@ class Parser:
             if type_token.value not in valid_types:
                 raise SyntaxError(f"Invalid column type: {type_token.value}")
                 
-            name_token = self.consume(TokenType.IDENTIFIER, "Esperado nome da coluna")
+            name_token = self.consume(TokenType.IDENTIFIER, "Expected column name")
             
             columns.append(Column(name_token.value, type_token.value, constraints))
             
             if not self.check(TokenType.RIGHT_BRACE):
-                self.consume(TokenType.COMMA, "Esperado ',' entre colunas")
+                self.consume(TokenType.COMMA, "Expected ',' between columns")
                 
-        self.consume(TokenType.RIGHT_BRACE, "Esperado '}' após definição das colunas")
-        table_name = self.consume(TokenType.IDENTIFIER, "Esperado nome da tabela").value
-        self.consume(TokenType.SEMICOLON, "Esperado ';' após nome da tabela")
+        self.consume(TokenType.RIGHT_BRACE, "Expected '}' after column definitions")
+        table_name = self.consume(TokenType.IDENTIFIER, "Expected table name").value
+        self.consume(TokenType.SEMICOLON, "Expected ';' after table name")
         
         return CreateTableStatement(Table(table_name, columns), if_not_exists)
     
@@ -192,11 +192,11 @@ class Parser:
             if not self.check(TokenType.RIGHT_BRACE):
                 self.consume(TokenType.COMMA, "Expected ',' between values")
                 
-        self.consume(TokenType.RIGHT_BRACE, "Esperado '}' após valores")
-        self.consume(TokenType.TO, "Esperado 'TO' após valores")
-        self.consume(TokenType.TABLE, "Esperado 'TABLE' após 'TO'")
-        table_name = self.consume(TokenType.IDENTIFIER, "Esperado nome da tabela").value
-        self.consume(TokenType.SEMICOLON, "Esperado ';' após nome da tabela")
+        self.consume(TokenType.RIGHT_BRACE, "Expected '}' after values")
+        self.consume(TokenType.TO, "Expected 'TO' after values")
+        self.consume(TokenType.TABLE, "Expected 'TABLE' after 'TO'")
+        table_name = self.consume(TokenType.IDENTIFIER, "Expected table name").value
+        self.consume(TokenType.SEMICOLON, "Expected ';' after table name")
         
         return InsertStatement(table_name, values)
     
@@ -222,29 +222,29 @@ class Parser:
             if not self.check(TokenType.RIGHT_BRACE):
                 self.consume(TokenType.COMMA, "Expected ',' between conditions")
                 
-        self.consume(TokenType.RIGHT_BRACE, "Esperado '}' após condições")
-        self.consume(TokenType.FROM, "Esperado 'FROM' após condições")
-        self.consume(TokenType.TABLE, "Esperado 'TABLE' após 'FROM'")
-        table_name = self.consume(TokenType.IDENTIFIER, "Esperado nome da tabela").value
-        self.consume(TokenType.SEMICOLON, "Esperado ';' após nome da tabela")
+        self.consume(TokenType.RIGHT_BRACE, "Expected '}' after conditions")
+        self.consume(TokenType.FROM, "Expected 'FROM' after conditions")
+        self.consume(TokenType.TABLE, "Expected 'TABLE' after 'FROM'")
+        table_name = self.consume(TokenType.IDENTIFIER, "Expected table name").value
+        self.consume(TokenType.SEMICOLON, "Expected ';' after table name")
         
         return DeleteStatement(table_name, conditions)
     
     def print_item_statement(self) -> PrintItemStatement:
         self.advance()  # Consome ITEM
-        column = self.consume(TokenType.IDENTIFIER, "Esperado nome da coluna").value
-        self.consume(TokenType.WHERE, "Esperado 'WHERE' após nome da coluna")
+        column = self.consume(TokenType.IDENTIFIER, "Expected column name").value
+        self.consume(TokenType.WHERE, "Expected 'WHERE' after column name")
         
         conditions = {}
-        name = self.consume(TokenType.IDENTIFIER, "Esperado nome do campo").value
-        self.consume(TokenType.EQUALS, "Esperado '=' após nome do campo")
-        value = self.consume(TokenType.STRING, "Esperado valor string").value
+        name = self.consume(TokenType.IDENTIFIER, "Expected field name").value
+        self.consume(TokenType.EQUALS, "Expected '=' after field name")
+        value = self.consume(TokenType.STRING, "Expected string value").value
         conditions[name] = value
         
-        self.consume(TokenType.FROM, "Esperado 'FROM' após condição")
-        self.consume(TokenType.TABLE, "Esperado 'TABLE' após 'FROM'")
-        table_name = self.consume(TokenType.IDENTIFIER, "Esperado nome da tabela").value
-        self.consume(TokenType.SEMICOLON, "Esperado ';' após nome da tabela")
+        self.consume(TokenType.FROM, "Expected 'FROM' after condition")
+        self.consume(TokenType.TABLE, "Expected 'TABLE' after 'FROM'")
+        table_name = self.consume(TokenType.IDENTIFIER, "Expected table name").value
+        self.consume(TokenType.SEMICOLON, "Expected ';' after table name")
         
         return PrintItemStatement(table_name, column, conditions)
     
